@@ -142,15 +142,33 @@
     <div class="field">
       <div class="field-label">Home country</div>
       <div class="combo-wrap">
-        <select id="home" onchange="handleCombo('home')">
-          <option value="">Select country...</option>
-          <option>Canada</option><option>United States</option><option>United Kingdom</option>
-          <option>France</option><option>Australia</option><option>Germany</option>
-          <option>Japan</option><option>Brazil</option><option>Mexico</option>
-          <option>custom">✏️ Type my country...</option>
-        </select>
-        <div class="combo-custom" id="home-custom"><input type="text" placeholder="Type your country"></div>
-      </div>
+      <input type="text" id="home" placeholder="e.g. Canada, France, Australia..." list="country-list">
+      <datalist id="country-list">
+        <option>Canada</option>
+        <option>United States</option>
+        <option>United Kingdom</option>
+        <option>France</option>
+        <option>Australia</option>
+        <option>Germany</option>
+        <option>Japan</option>
+        <option>Brazil</option>
+        <option>Mexico</option>
+        <option>Italy</option>
+        <option>Spain</option>
+        <option>Portugal</option>
+        <option>Netherlands</option>
+        <option>Belgium</option>
+        <option>Switzerland</option>
+        <option>Sweden</option>
+        <option>Norway</option>
+        <option>Denmark</option>
+        <option>New Zealand</option>
+        <option>South Korea</option>
+        <option>China</option>
+        <option>India</option>
+        <option>South Africa</option>
+        <option>Argentina</option>
+      </datalist>
     </div>
   </div>
   <div class="form-grid g3" style="margin-bottom:10px;">
