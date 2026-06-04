@@ -423,7 +423,7 @@ function selectPrompt(btn, type) {
 
 function buildPrompt(type) {
   const dest = document.getElementById('destination').value || '[destination]';
-  const home = getVal('home') || '[home country]';
+  const home = document.getElementById('home').value || '[home country]';
   const travelers = document.getElementById('travelers').value || '2';
   const days = getDays() || '[number]';
   const dates = getDateStr() || '[dates]';
