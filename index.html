@@ -190,7 +190,24 @@
           <input class="tags-input" id="interests-input" placeholder="Add interest..." onkeydown="handleTagInput(event,'interests')" oninput="filterTagOptions('interests')">
         </div>
         <div class="tags-dropdown" id="interests-dropdown">
-          ${['🏛 Temples & shrines','🍜 Street food','📸 Photography','🥾 Hiking & nature','🎨 Art & museums','🛍 Shopping','🎭 Culture & history','🌸 Gardens & parks','🎵 Live music','🏖 Beaches','🍶 Local food tours','🚴 Cycling','🎎 Traditional experiences','🌃 Nightlife','🧘 Wellness & spa','⛷ Winter sports','🤿 Water sports','🦌 Wildlife'].map(i=>`<div class="tags-option" onclick="addTag('interests','${i}',this)">${i}</div>`).join('')}
+          <div class="tags-option" onclick="addTag('interests','🏛 Temples & shrines',this)">🏛 Temples & shrines</div>
+          <div class="tags-option" onclick="addTag('interests','🍜 Street food',this)">🍜 Street food</div>
+          <div class="tags-option" onclick="addTag('interests','📸 Photography',this)">📸 Photography</div>
+          <div class="tags-option" onclick="addTag('interests','🥾 Hiking & nature',this)">🥾 Hiking & nature</div>
+          <div class="tags-option" onclick="addTag('interests','🎨 Art & museums',this)">🎨 Art & museums</div>
+          <div class="tags-option" onclick="addTag('interests','🛍 Shopping',this)">🛍 Shopping</div>
+          <div class="tags-option" onclick="addTag('interests','🎭 Culture & history',this)">🎭 Culture & history</div>
+          <div class="tags-option" onclick="addTag('interests','🌸 Gardens & parks',this)">🌸 Gardens & parks</div>
+          <div class="tags-option" onclick="addTag('interests','🎵 Live music',this)">🎵 Live music</div>
+          <div class="tags-option" onclick="addTag('interests','🏖 Beaches',this)">🏖 Beaches</div>
+          <div class="tags-option" onclick="addTag('interests','🍶 Local food tours',this)">🍶 Local food tours</div>
+          <div class="tags-option" onclick="addTag('interests','🚴 Cycling',this)">🚴 Cycling</div>
+          <div class="tags-option" onclick="addTag('interests','🎎 Traditional experiences',this)">🎎 Traditional experiences</div>
+          <div class="tags-option" onclick="addTag('interests','🌃 Nightlife',this)">🌃 Nightlife</div>
+          <div class="tags-option" onclick="addTag('interests','🧘 Wellness & spa',this)">🧘 Wellness & spa</div>
+          <div class="tags-option" onclick="addTag('interests','⛷ Winter sports',this)">⛷ Winter sports</div>
+          <div class="tags-option" onclick="addTag('interests','🤿 Water sports',this)">🤿 Water sports</div>
+          <div class="tags-option" onclick="addTag('interests','🦌 Wildlife',this)">🦌 Wildlife</div>
         </div>
       </div>
     </div>
@@ -201,7 +218,21 @@
           <input class="tags-input" id="food-input" placeholder="Add preference..." onkeydown="handleTagInput(event,'food')" oninput="filterTagOptions('food')">
         </div>
         <div class="tags-dropdown" id="food-dropdown">
-          ${['🌿 Vegetarian','🌱 Vegan','🐟 Pescatarian','🍖 No restrictions','🥛 Lactose-free','🌾 Gluten-free','🦐 No shellfish','🥜 Nut allergy','🌶 Love spicy food','🍣 Love sushi & raw fish','❌ No pork','❌ No beef','💰 Budget meals only','⭐ Fine dining lover','🍺 Local drinks & craft beer'].map(i=>`<div class="tags-option" onclick="addTag('food','${i}',this)">${i}</div>`).join('')}
+          <div class="tags-option" onclick="addTag('food','🌿 Vegetarian',this)">🌿 Vegetarian</div>
+          <div class="tags-option" onclick="addTag('food','🌱 Vegan',this)">🌱 Vegan</div>
+          <div class="tags-option" onclick="addTag('food','🐟 Pescatarian',this)">🐟 Pescatarian</div>
+          <div class="tags-option" onclick="addTag('food','🍖 No restrictions',this)">🍖 No restrictions</div>
+          <div class="tags-option" onclick="addTag('food','🥛 Lactose-free',this)">🥛 Lactose-free</div>
+          <div class="tags-option" onclick="addTag('food','🌾 Gluten-free',this)">🌾 Gluten-free</div>
+          <div class="tags-option" onclick="addTag('food','🦐 No shellfish',this)">🦐 No shellfish</div>
+          <div class="tags-option" onclick="addTag('food','🥜 Nut allergy',this)">🥜 Nut allergy</div>
+          <div class="tags-option" onclick="addTag('food','🌶 Love spicy food',this)">🌶 Love spicy food</div>
+          <div class="tags-option" onclick="addTag('food','🍣 Love sushi & raw fish',this)">🍣 Love sushi & raw fish</div>
+          <div class="tags-option" onclick="addTag('food','❌ No pork',this)">❌ No pork</div>
+          <div class="tags-option" onclick="addTag('food','❌ No beef',this)">❌ No beef</div>
+          <div class="tags-option" onclick="addTag('food','💰 Budget meals only',this)">💰 Budget meals only</div>
+          <div class="tags-option" onclick="addTag('food','⭐ Fine dining lover',this)">⭐ Fine dining lover</div>
+          <div class="tags-option" onclick="addTag('food','🍺 Local drinks & craft beer',this)">🍺 Local drinks & craft beer</div>
         </div>
       </div>
     </div>
