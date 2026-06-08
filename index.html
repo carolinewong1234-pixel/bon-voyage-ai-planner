@@ -286,13 +286,15 @@ function handleCombo(id) {
 function openTagsDropdown(type) {
   document.querySelectorAll('.tags-dropdown').forEach(d => d.classList.remove('open'));
   document.getElementById(type + '-dropdown').classList.add('open');
-  document.getElementById(type + '-input').focus();
+  const inp = document.getElementById(type + '-input');
+  inp.focus();
+  filterTagOptions(type);
 }
 
 function filterTagOptions(type) {
-  const q = document.getElementById(type + '-input').value.toLowerCase();
+  const q = document.getElementById(type + '-input').value.toLowerCase().trim();
   document.querySelectorAll(`#${type}-dropdown .tags-option`).forEach(o => {
-    o.style.display = o.textContent.toLowerCase().includes(q) ? '' : 'none';
+    o.style.display = (!q || o.textContent.toLowerCase().includes(q)) ? '' : 'none';
   });
 }
 
@@ -302,7 +304,9 @@ function addTag(type, value, el) {
     renderTags(type);
     if (el) el.classList.add('selected');
   }
-  document.getElementById(type + '-input').value = '';
+  const inp = document.getElementById(type + '-input');
+  inp.value = '';
+  inp.focus();
   filterTagOptions(type);
 }
 
@@ -330,7 +334,7 @@ function handleTagInput(e, type) {
   if (e.key === 'Enter') {
     e.preventDefault();
     const val = e.target.value.trim();
-    if (val) { addTag(type, val, null); e.target.value = ''; }
+    if (val) { addTag(type, val, null); e.target.value = ''; filterTagOptions(type); }
   }
   if (e.key === 'Escape') document.getElementById(type + '-dropdown').classList.remove('open');
 }
@@ -386,121 +390,176 @@ function getSeason() {
   return `${months[m]} (${seasons[m]})`;
 }
 
+// Currency map by home country
+const currencyMap = {
+  'canada': 'CAD', 'canadian': 'CAD',
+  'united states': 'USD', 'usa': 'USD', 'us': 'USD', 'america': 'USD',
+  'united kingdom': 'GBP', 'uk': 'GBP', 'britain': 'GBP', 'england': 'GBP',
+  'australia': 'AUD', 'australian': 'AUD',
+  'france': 'EUR', 'germany': 'EUR', 'italy': 'EUR', 'spain': 'EUR',
+  'portugal': 'EUR', 'netherlands': 'EUR', 'belgium': 'EUR',
+  'switzerland': 'CHF', 'swiss': 'CHF',
+  'japan': 'JPY', 'japanese': 'JPY',
+  'south korea': 'KRW', 'korea': 'KRW',
+  'china': 'CNY', 'chinese': 'CNY',
+  'brazil': 'BRL', 'brazilian': 'BRL',
+  'mexico': 'MXN', 'mexican': 'MXN',
+  'india': 'INR', 'indian': 'INR',
+  'new zealand': 'NZD',
+  'sweden': 'SEK', 'swedish': 'SEK',
+  'norway': 'NOK', 'norwegian': 'NOK',
+  'denmark': 'DKK', 'danish': 'DKK',
+  'south africa': 'ZAR',
+  'argentina': 'ARS',
+};
+
+function getCurrency() {
+  const home = document.getElementById('home').value.toLowerCase().trim();
+  for (const [key, val] of Object.entries(currencyMap)) {
+    if (home.includes(key)) return val;
+  }
+  return 'USD'; // default
+}
+
+function only(val, label) {
+  // Returns "label: val" only if val is filled in, otherwise empty string
+  if (!val || val === '' || val.startsWith('[')) return '';
+  return `${label}: ${val}`;
+}
+
+function onlyList(arr, label) {
+  if (!arr || arr.length === 0) return '';
+  return `${label}: ${arr.join(', ')}`;
+}
+
+function buildContext() {
+  const dest = document.getElementById('destination').value.trim();
+  const home = document.getElementById('home').value.trim();
+  const travelers = document.getElementById('travelers').value;
+  const days = getDays();
+  const dates = getDateStr();
+  const season = getSeason();
+  const budget = getVal('budget');
+  const accommodation = getVal('accommodation');
+  const interests = tagData.interests;
+  const food = tagData.food;
+  const area = document.getElementById('area').value.trim();
+  const style = getVal('travel-style');
+  const currency = getCurrency();
+
+  const lines = [
+    only(dest, 'Destination'),
+    only(home, 'From'),
+    travelers ? `Travelers: ${travelers}` : '',
+    days ? `Duration: ${days} days` : '',
+    dates ? `Dates: ${dates}` : '',
+    season ? `Season: ${season}` : '',
+    budget ? `Budget per person: ${budget} ${currency}` : '',
+    only(accommodation, 'Accommodation'),
+    onlyList(interests, 'Interests'),
+    onlyList(food, 'Food preferences'),
+    only(area, 'Staying in'),
+    only(style, 'Travel style'),
+  ].filter(l => l !== '');
+
+  return { dest, home, travelers, days, dates, season, budget, accommodation,
+           interests, food, area, style, currency, lines };
+}
+
 function buildPrompt() {
-  const dest = document.getElementById('destination').value || '[your destination]';
-  const home = document.getElementById('home').value || '[your home country]';
-  const travelers = document.getElementById('travelers').value || '2';
-  const days = getDays() || '[number of]';
-  const dates = getDateStr() || '[your travel dates]';
-  const season = getSeason() || '[the season]';
-  const budget = getVal('budget') || '[your budget]';
-  const accommodation = getVal('accommodation') || '[your accommodation style]';
-  const interests = tagData.interests.length ? tagData.interests.join(', ') : '[your interests]';
-  const food = tagData.food.length ? tagData.food.join(', ') : '[your food preferences]';
-  const area = document.getElementById('area').value || '[your area]';
-  const style = getVal('travel-style') || '[your travel style]';
+  const ctx = buildContext();
+  const { dest, home, travelers, days, dates, season, budget, accommodation,
+          interests, food, area, style, currency, lines } = ctx;
+  const contextBlock = lines.length ? lines.join('\n') : 'Destination: [not specified]';
 
   const prompts = {
     itinerary:
-`You are an expert travel planner. Create a detailed day-by-day itinerary for ${travelers} traveler(s) visiting ${dest} for ${days} days (${dates}).
+`You are an expert travel planner. Create a detailed day-by-day itinerary based on the following trip details:
 
-Travel style: ${style}
-Interests: ${interests}
-Budget per person: ${budget}
-Accommodation: ${accommodation}
-Staying in: ${area}
-Season: ${season}
+${contextBlock}
 
 For each day provide:
 - Morning, afternoon and evening activities
-- Estimated cost per activity in local currency and USD
-- Practical tips (opening hours, booking advice, best transport options)
+- Estimated costs in ${currency}${budget ? '' : ' and USD'}
+- Practical tips (opening hours, booking advice, best transport)
 - One meal recommendation per section (breakfast, lunch, dinner)
-- Any seasonal notes specific to visiting in ${season}
+${season ? `- Seasonal notes for visiting in ${season}` : ''}
 
-Keep recommendations authentic. Mix popular highlights with local experiences. Flag anything that requires advance booking.`,
+Keep recommendations authentic. Mix popular highlights with local experiences. Flag anything requiring advance booking.`,
 
     food:
-`You are a local food expert. Create a comprehensive food guide for ${travelers} traveler(s) visiting ${dest} for ${days} days in ${season}.
+`You are a local food expert. Create a comprehensive food guide based on the following trip details:
 
-Food preferences & allergies: ${food}
-Budget per meal: roughly ${budget} total per person for the whole trip
-Staying in: ${area}
+${contextBlock}
 
 Please provide:
-- 10 must-try local dishes with descriptions and best places to find them
+- 10 must-try local dishes with descriptions and where to find them
 - 5 street food spots or markets with specific locations
 - 3 authentic local restaurants (budget-friendly, loved by locals)
-- 2 special dinner experiences worth splurging on
+- 2 special dinner experiences worth splurging on${budget ? ` (budget context: ${budget} ${currency} per person total trip)` : ''}
 - One local food market or hall worth visiting
-- Food etiquette and ordering tips specific to ${dest}
-- What to avoid (tourist trap restaurants or dishes)`,
+- Food etiquette and ordering tips${dest ? ` specific to ${dest}` : ''}
+- What to avoid (tourist trap restaurants)`,
 
     budget:
-`You are a travel budget expert. Create a detailed budget breakdown for ${travelers} traveler(s) visiting ${dest} for ${days} days (${dates}).
+`You are a travel budget expert. Create a detailed budget breakdown based on the following trip details:
 
-Total budget: ${budget} per person
-Accommodation style: ${accommodation}
-Travel style: ${style}
-Planned activities: ${interests}
+${contextBlock}
 
 Please provide:
-- Recommended daily budget split by category: accommodation, food, local transport, activities, shopping, miscellaneous
-- Total estimated cost per person for ${days} days
-- Top 5 money-saving tips specific to ${dest}
-- Hidden costs most tourists don't expect in ${dest}
-- Best free or low-cost activities and experiences
-- Currency tips: cash vs card, ATM advice, tipping culture in ${dest}`,
+- Recommended daily budget split by category: accommodation, food, local transport, activities, shopping, misc${budget ? ` (total budget: ${budget} ${currency} per person)` : ''}
+- Total estimated cost per person${days ? ` for ${days} days` : ''}
+- Top 5 money-saving tips${dest ? ` specific to ${dest}` : ''}
+- Hidden costs most tourists don't expect
+- Best free or low-cost activities
+- Currency tips: cash vs card, ATM advice, tipping culture`,
 
     packing:
-`You are a travel packing expert. Create a complete packing list for ${travelers} traveler(s) visiting ${dest} in ${season} for ${days} days.
+`You are a travel packing expert. Create a complete packing list based on the following trip details:
 
-Planned activities: ${interests}
-Accommodation: ${accommodation}
-Travel style: ${style}
+${contextBlock}
 
 Organize into these categories:
-- Clothing (specific to ${season} weather in ${dest} and planned activities)
+- Clothing${season ? ` (specific to ${season} weather` : ' (appropriate for the climate'}${dest ? ` in ${dest})` : ')'}
 - Shoes & accessories
 - Toiletries & health items
 - Electronics & cables
 - Documents & money
 - Day bag essentials
-- ${dest}-specific items most travelers forget
+${dest ? `- ${dest}-specific items most travelers forget` : '- Destination-specific items travelers often forget'}
 
-Flag any items that are hard to find or expensive in ${dest}. Note any dress codes or cultural considerations to be aware of.`,
+Flag items that are hard to find or expensive at the destination. Note any dress codes or cultural considerations.`,
 
     gems:
-`You are a local travel insider. Suggest 12 hidden gems and local secrets in ${dest} that most tourists never discover.
+`You are a local travel insider. Suggest 12 hidden gems and local secrets that most tourists never discover, based on these trip details:
 
-My interests: ${interests}
-Travel style: ${style}
-Based in: ${area}
-Visiting for: ${days} days in ${season}
+${contextBlock}
 
 For each hidden gem include:
 - Name and exact location or neighbourhood
 - Why locals love it and why tourists miss it
-- Best time to visit (time of day or season)
-- How to get there from ${area}
+- Best time to visit
+${area ? `- How to get there from ${area}` : '- How to get there'}
 - Approximate cost (free or paid)
 - One insider tip
 
-Focus on places that feel genuinely local — not on the first page of Google results. Mix food spots, viewpoints, neighbourhoods, experiences and free attractions.`,
+Focus on places that feel genuinely local — not on the first page of Google results.`,
 
     safety:
-`You are a travel safety expert. Create a comprehensive safety and emergency briefing for ${travelers} traveler(s) from ${home} visiting ${dest} for ${days} days (${dates}).
+`You are a travel safety expert. Create a safety and emergency briefing based on the following trip details:
+
+${contextBlock}
 
 Please cover:
-- Emergency numbers: police, ambulance, fire, tourist police (if applicable)
-- Nearest hospitals and 24-hour pharmacies to ${area}
-- ${home} embassy or consulate contact details in ${dest}
-- Top 5 scams targeting tourists in ${dest} and exactly how to avoid them
+- Emergency numbers: police, ambulance, fire${dest ? `, tourist police in ${dest}` : ''}
+${area ? `- Nearest hospitals and 24-hour pharmacies to ${area}` : '- Nearest hospitals and pharmacies'}
+${home ? `- ${home} embassy or consulate contact details${dest ? ` in ${dest}` : ''}` : '- Embassy or consulate contact details'}
+- Top 5 scams targeting tourists and how to avoid them
 - Neighbourhoods or situations to be cautious about
-- Health advisories for visiting ${dest} in ${season}
-- Entry requirements for citizens of ${home}: visa, health documents, customs rules
-- Essential apps for navigation, translation and safety in ${dest}
-- Travel insurance recommendations for this destination`
+${season ? `- Health advisories for visiting in ${season}` : '- Health advisories'}
+${home ? `- Entry requirements for ${home} citizens: visa, health documents, customs rules` : '- Entry requirements and visa information'}
+- Essential apps for navigation and safety
+- Travel insurance recommendations`
   };
 
   return prompts[selectedType];
